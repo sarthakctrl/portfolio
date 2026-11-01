@@ -1,0 +1,339 @@
+/*
+ * Sarthak Sharma's portfolio. The comic-zine look of spidey-hang-site (its colours, lettering, ink
+ * borders and hard shadows), laid out for a résumé.
+ */
+:root {
+  --suit-red: #c8202a;
+  --suit-red-deep: #8f141c;
+  --suit-blue: #1f4a9a;
+  --ink: #0e0e14;
+  --paper: #f5f5f5;
+  --paper-warm: #fbf6ea;
+  --white: #ffffff;
+  --bubble: #0a84ff;
+  --gold: #e8b33a;
+  --ok: #2e7d32;
+
+  /* Theme tokens. Light is the comic page; dark is the same comic at night. */
+  --text: var(--ink);
+  --text-soft: #3a3d47;
+  --bg: var(--paper);
+  --dots: rgba(14, 14, 20, 0.07);
+  --panel: var(--white);
+  --panel-warm: var(--paper-warm);
+  --line: var(--ink);
+  --shadow-color: var(--ink);
+  --shout-shadow: var(--ink);
+  --link: var(--suit-blue);
+  --key: var(--suit-blue);
+  --string: var(--ok);
+  --kicker: var(--suit-red);
+  --border: 3px solid var(--line);
+  --shadow: 6px 6px 0 var(--shadow-color);
+  --shadow-small: 3px 3px 0 var(--shadow-color);
+  --radius: 4px;
+
+  --font-shout: 'Bangers', 'Impact', 'Arial Black', sans-serif;
+  --font-body: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --gutter: clamp(16px, 4vw, 48px);
+  --max: 1180px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --text: #f1f3f6;
+    --text-soft: #b9bfcc;
+    --bg: #11131b;
+    --dots: rgba(241, 243, 246, 0.06);
+    --panel: #1b1e2a;
+    --panel-warm: #242838;
+    --line: #e9ebf0;
+    --shadow-color: var(--suit-red);
+    --shout-shadow: #000000;
+    --link: #8fb6ff;
+    --key: #8fb6ff;
+    --string: #9fe6a0;
+    --kicker: var(--gold);
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --text: #f1f3f6;
+  --text-soft: #b9bfcc;
+  --bg: #11131b;
+  --dots: rgba(241, 243, 246, 0.06);
+  --panel: #1b1e2a;
+  --panel-warm: #242838;
+  --line: #e9ebf0;
+  --shadow-color: var(--suit-red);
+  --shout-shadow: #000000;
+  --link: #8fb6ff;
+  --key: #8fb6ff;
+  --string: #9fe6a0;
+  --kicker: var(--gold);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  font: 400 17px/1.55 var(--font-body);
+  color: var(--text);
+  background-color: var(--bg);
+  /* Halftone dots, the way a comic is printed. */
+  background-image: radial-gradient(var(--dots) 1.4px, transparent 1.6px);
+  background-size: 14px 14px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a { color: var(--link); text-underline-offset: 3px; text-decoration-thickness: 2px; }
+h1, h2, h3 { line-height: 1.1; margin: 0 0 0.5em; }
+p { margin: 0 0 1em; }
+:focus-visible { outline: 3px solid var(--bubble); outline-offset: 3px; border-radius: 2px; }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: absolute; left: 12px; top: -60px; z-index: 200; background: var(--ink); color: var(--white); padding: 10px 14px; }
+.skip:focus { top: 12px; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* ---- Top bar -------------------------------------------------------------------------------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 60px;
+  padding: 8px var(--gutter);
+  background: var(--suit-red);
+  color: var(--white);
+  border-bottom: 3px solid var(--ink);
+}
+.brand { flex: none; margin-right: auto; color: inherit; text-decoration: none; font: 400 1.65rem/1 var(--font-shout); letter-spacing: 0.04em; text-shadow: 2px 2px 0 var(--ink); }
+.topnav { display: flex; gap: 2px; }
+.topnav a { padding: 6px 9px; color: var(--white); font-weight: 700; text-decoration: none; border-radius: 3px; white-space: nowrap; }
+.topnav a:hover { background: var(--ink); }
+.topbar-tools { display: flex; align-items: center; gap: 10px; }
+.tray, .hang-up, .theme-toggle {
+  min-height: 40px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--ink);
+  font: 700 0.9rem/1 var(--font-body);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+}
+.tray, .theme-toggle { display: inline-grid; place-items: center; width: 42px; padding: 0; }
+.hang-up { padding: 0 12px; background: var(--suit-blue); color: var(--white); }
+.hang-up[hidden] { display: none; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme='dark'] .theme-toggle .icon-sun { display: block; }
+:root[data-theme='dark'] .theme-toggle .icon-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .theme-toggle .icon-sun { display: block; }
+  :root:not([data-theme='light']) .theme-toggle .icon-moon { display: none; }
+}
+@media (max-width: 1000px) { .topnav { display: none; } }
+
+/* ---- Lettering, panels, buttons --------------------------------------------------------------- */
+
+.shout { font-family: var(--font-shout); font-weight: 400; letter-spacing: 0.03em; line-height: 0.95; margin: 0; text-shadow: 4px 4px 0 var(--suit-red); }
+.shout-md { font-size: clamp(2.5rem, 6vw, 4.25rem); }
+.kicker { font: 600 0.8rem/1.4 var(--font-mono); text-transform: uppercase; letter-spacing: 0.15em; color: var(--kicker); margin: 0 0 10px; }
+.panel { background: var(--panel); border: var(--border); box-shadow: var(--shadow); border-radius: var(--radius); }
+.section { padding: 88px 0 24px; }
+.section-head { max-width: 780px; margin-bottom: 32px; }
+.section-head p:last-child { color: var(--text-soft); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 20px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 3px 3px 0 var(--shadow-color);
+  font: 700 1rem/1.2 var(--font-body);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--shadow-color); }
+.btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--shadow-color); }
+.contact .btn { box-shadow: 3px 3px 0 var(--ink); }
+.btn-gold { background: var(--gold); }
+.btn-paper { background: var(--white); }
+@media (prefers-reduced-motion: reduce) { .btn, .btn:hover, .btn:active { transition: none; transform: none; } }
+
+.chip { display: inline-block; font: 600 0.8rem/1.4 var(--font-mono); padding: 4px 9px; border: 2px solid var(--line); background: var(--panel-warm); margin: 0 6px 8px 0; }
+.chip.primary { background: var(--gold); color: var(--ink); border-color: var(--ink); }
+
+/* ---- Hero ------------------------------------------------------------------------------------ */
+
+.hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 48px; align-items: center; padding: 72px 0 40px; }
+.hero h1 { font-size: clamp(4rem, 11vw, 8.5rem); }
+.hero h1 span { display: block; color: var(--suit-red); text-shadow: 4px 4px 0 var(--shout-shadow); }
+.role-line { font: 700 1.4rem/1.3 var(--font-body); margin: 14px 0 6px; }
+.lede { font-size: 1.15rem; max-width: 600px; color: var(--text-soft); margin: 0; }
+.cta { display: flex; flex-wrap: wrap; gap: 14px; margin: 26px 0 16px; }
+.fineprint { font: 0.8rem/1.6 var(--font-mono); color: var(--text-soft); overflow-wrap: anywhere; }
+.hero-card { position: relative; overflow: hidden; transform: rotate(1.5deg); }
+.hero-card header { display: flex; gap: 6px; align-items: center; padding: 8px 14px; background: var(--ink); color: #9fe6a0; font: 0.8rem var(--font-mono); }
+.hero-card header i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--suit-red); }
+.hero-card header i.gold { background: var(--gold); }
+.hero-card header i.green { background: var(--ok); }
+.hero-card pre { margin: 0; padding: 18px; font: 0.875rem/1.6 var(--font-mono); white-space: pre-wrap; }
+.k { color: var(--key); }
+.s { color: var(--string); }
+.sfx { position: absolute; right: 14px; top: 44px; font: 2.1rem var(--font-shout); color: var(--gold); -webkit-text-stroke: 1.5px var(--ink); transform: rotate(-12deg); }
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; padding-top: 48px; }
+  .hero-card { transform: none; }
+}
+
+/* ---- About: facts strip ----------------------------------------------------------------------- */
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 28px; }
+.stats div { padding: 18px; border-right: var(--border); }
+.stats div:last-child { border-right: 0; }
+.stats b { display: block; font: 2.5rem/1.1 var(--font-shout); color: var(--suit-red); letter-spacing: 0.03em; }
+.stats span { font-size: 0.875rem; color: var(--text-soft); }
+@media (max-width: 700px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stats div:nth-child(2) { border-right: 0; }
+  .stats div:nth-child(-n + 2) { border-bottom: var(--border); }
+}
+
+/* ---- Skills ----------------------------------------------------------------------------------- */
+
+.stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.stack .panel { padding: 18px 20px 12px; }
+.stack .wide { grid-column: 1 / -1; }
+.stack h3, .edu h3 { font: 400 1.65rem/1.1 var(--font-shout); letter-spacing: 0.03em; margin: 0 0 12px; }
+@media (max-width: 900px) { .stack { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .stack { grid-template-columns: 1fr; } }
+
+/* ---- Experience ------------------------------------------------------------------------------- */
+
+.timeline { display: grid; gap: 26px; }
+.job { display: grid; grid-template-columns: 190px 1fr; overflow: hidden; }
+.job .when { padding: 18px; background: var(--suit-blue); color: var(--white); font: 600 0.875rem/1.5 var(--font-mono); border-right: var(--border); }
+.job .when b { display: block; margin-bottom: 4px; font: 400 1.9rem/1.1 var(--font-shout); letter-spacing: 0.03em; }
+.job.now .when { background: var(--suit-red); }
+.job .what { padding: 18px 22px; }
+.job h3 { margin: 0 0 4px; font-size: 1.35rem; }
+.job .role { margin: 0 0 10px; color: var(--text-soft); font-weight: 500; }
+.job ul { margin: 8px 0 0; padding-left: 20px; }
+.job li { margin-bottom: 6px; }
+@media (max-width: 640px) {
+  .job { grid-template-columns: 1fr; }
+  .job .when { border-right: 0; border-bottom: var(--border); }
+}
+
+/* ---- Projects --------------------------------------------------------------------------------- */
+
+.projects { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.proj { display: flex; flex-direction: column; overflow: hidden; }
+.proj .req { padding: 10px 16px; background: var(--ink); color: #f1f3f6; font: 0.875rem var(--font-mono); overflow-wrap: anywhere; }
+.proj .req b { color: var(--gold); margin-right: 8px; }
+.proj .body { flex: 1; padding: 16px 18px; }
+.proj h3 { margin: 0 0 6px; font-size: 1.3rem; }
+.proj p { margin: 0; color: var(--text-soft); }
+.proj .res { padding: 10px 18px; border-top: 2px dashed var(--line); background: var(--panel-warm); font: 0.8rem/1.6 var(--font-mono); overflow-wrap: anywhere; }
+.proj .res .ok { color: var(--string); font-weight: 600; }
+@media (max-width: 760px) { .projects { grid-template-columns: 1fr; } }
+
+/* ---- Education, certifications, achievements ------------------------------------------------- */
+
+.edu { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.edu .panel { padding: 18px 22px; }
+.edu .wide { grid-column: 1 / -1; }
+.edu ul { margin: 0; padding-left: 20px; }
+.edu li { margin-bottom: 8px; }
+.edu small { color: var(--text-soft); font-family: var(--font-mono); }
+@media (max-width: 760px) { .edu { grid-template-columns: 1fr; } }
+
+/* ---- Terminal -------------------------------------------------------------------------------- */
+
+.term { overflow: hidden; background: #0e0e14; color: #e9ebf0; }
+.term header { padding: 8px 14px; background: var(--suit-red); color: var(--white); font: 600 0.8rem var(--font-mono); border-bottom: 3px solid var(--ink); }
+.term-out { height: 300px; overflow: auto; padding: 14px 16px; font: 0.875rem/1.6 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.term-out .t-dim { color: #8a91a0; }
+.term-out .t-cmd { color: var(--gold); }
+.term form { display: flex; border-top: 1px solid #2a2e3c; }
+.term label { padding: 12px 0 12px 16px; font: 0.875rem var(--font-mono); color: #9fe6a0; }
+.term input { flex: 1; min-width: 0; padding: 12px; background: transparent; border: 0; color: inherit; font: 0.875rem var(--font-mono); outline: none; }
+.chips-row { margin-top: 14px; }
+.chips-row button { margin: 0 6px 8px 0; padding: 6px 10px; border: 2px solid var(--line); background: var(--panel); color: var(--text); font: 600 0.8rem var(--font-mono); cursor: pointer; }
+.chips-row button:hover { background: var(--gold); color: var(--ink); }
+
+/* ---- Contact, footer -------------------------------------------------------------------------- */
+
+.contact { margin: 88px 0 40px; padding: 56px 24px; text-align: center; background: var(--suit-red); color: var(--white); }
+.contact .shout { font-size: clamp(3rem, 8vw, 6rem); text-shadow: 4px 4px 0 var(--ink); }
+.contact p { font-size: 1.2rem; }
+.contact .cta { justify-content: center; }
+.footer { padding: 0 var(--gutter) 48px; text-align: center; font: 0.8rem/1.6 var(--font-mono); color: var(--text-soft); }
+
+/* ---- Overlay layers: Spidey, his bubble, the menu (as spidey-hang-site) ----------------------- */
+
+.spidey-layer { position: fixed; inset: 0; z-index: 50; width: 100vw; height: 100vh; pointer-events: none; touch-action: none; }
+.spidey-layer.is-hit { pointer-events: auto; cursor: pointer; }
+.spidey-layer.is-grabbing { cursor: grabbing; }
+.spidey-layer[hidden] { display: none; }
+body > .bubble { position: fixed; z-index: 55; }
+
+.menu-layer { position: fixed; inset: 0; z-index: 100; }
+.menu-layer[hidden] { display: none; }
+.menu {
+  position: fixed;
+  min-width: 230px;
+  max-width: min(340px, calc(100vw - 16px));
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  background: rgba(246, 246, 248, 0.94);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+  border: 1px solid rgba(14, 14, 20, 0.22);
+  border-radius: 8px;
+  box-shadow: 0 10px 34px rgba(14, 14, 20, 0.28), 0 0 0 0.5px rgba(14, 14, 20, 0.1);
+  font: 14px/1.3 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  animation: menu-pop 0.12s ease-out;
+}
+@keyframes menu-pop { from { opacity: 0; transform: scale(0.97); } }
+@media (prefers-reduced-motion: reduce) { .menu { animation: none; } }
+.menu-item { display: flex; align-items: center; gap: 6px; min-height: 30px; padding: 4px 10px 4px 6px; border-radius: 5px; cursor: default; color: #1d1d22; outline: none; flex-wrap: wrap; }
+.menu-item:focus, .menu-item:hover { background: var(--bubble); color: var(--white); }
+.menu-item[aria-disabled='true'] { color: #8a8d96; }
+.menu-item[aria-disabled='true']:focus, .menu-item[aria-disabled='true']:hover { background: rgba(14, 14, 20, 0.08); color: #6c6f78; }
+.menu-mark { width: 16px; text-align: center; font-size: 12px; }
+.menu-label { flex: 1; }
+.menu-note { flex-basis: 100%; padding-left: 22px; font-size: 11.5px; opacity: 0.8; }
+.menu-arrow { font-size: 16px; line-height: 1; }
+.menu-sep { height: 1px; margin: 5px 8px; background: rgba(14, 14, 20, 0.14); }
+:root[data-theme='dark'] .menu { background: rgba(40, 42, 54, 0.94); border-color: rgba(255, 255, 255, 0.16); }
+:root[data-theme='dark'] .menu-item { color: #eef0f5; }
+:root[data-theme='dark'] .menu-item[aria-disabled='true'] { color: #8d93a3; }
+:root[data-theme='dark'] .menu-sep { background: rgba(255, 255, 255, 0.14); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .menu { background: rgba(40, 42, 54, 0.94); border-color: rgba(255, 255, 255, 0.16); }
+  :root:not([data-theme='light']) .menu-item { color: #eef0f5; }
+  :root:not([data-theme='light']) .menu-item[aria-disabled='true'] { color: #8d93a3; }
+  :root:not([data-theme='light']) .menu-sep { background: rgba(255, 255, 255, 0.14); }
+}
+@media (pointer: coarse) { .menu-item { min-height: 40px; } }

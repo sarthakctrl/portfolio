@@ -1,0 +1,47 @@
+Sarthak Sharma
+Backend Developer
+sarthakjk14@gmail.com | +91 9086516883 | Udhampur, J&K 182101, India
+PROFESSIONAL SUMMARY
+Backend Developer with hands-on experience building and maintaining production-grade web applications in Java (Java 8,
+Spring Boot) and .NET. Skilled in REST API development, database design, JWT-based authentication and authorization, and
+debugging live production systems. Have delivered scalable modules across CRM, HRMS, and commercial SaaS platforms.
+TECHNICAL SKILLS
+Languages: Java (Primary), C# / .NET, JavaScript, SQL, Python, C, C++, PHP
+Backend & Frameworks: Java 8, Spring Boot, .NET, Node.js, Express.js, REST APIs
+Frontend & Web: React, HTML, CSS, Bootstrap (MERN Stack)
+Databases: MySQL, PostgreSQL, MongoDB, Database Design
+DevOps (Interest): CI/CD Pipelines (Azure), Linux Commands, Agent Jobs, Virtual Machine Configuration
+Concepts & Tools: JWT Authentication & Authorization, Email API Integration, Role-Based Permissions (SaaS), Debugging, Git
+Soft Skills: Problem Solver, Critical Thinker, Team Player, Punctual
+EXPERIENCE
+Backend Developer — Wealthmax Jul 2025 – Present
+Java (Primary) & .NET
+• Debug and resolve production issues across live applications, improving stability and reliability of client-facing platforms.
+• Developed email-sending APIs in Java, applying Java 8 concepts and clean, maintainable design.
+• Built JWT-based authentication and authorization for the HRMS platform, securing user access and role management.
+• Developed multiple standalone modules and implemented role-based permissions for the Protection & Mortgage (P&M)
+CRM SaaS, built in .NET.
+• Applied database design principles and strong debugging skills across both Java and .NET codebases.
+MERN Stack Developer — Intern, Solitaire Infosys Dec 2024 – Jun 2025
+• Completed a 6-month internship building full-stack web applications with MongoDB, Express.js, React, and Node.js.
+• Developed responsive interfaces and REST APIs, strengthening end-to-end full-stack fundamentals.
+Co-Founder — Sambodhan Feb 2024 – Present
+• Co-founded a networking platform focused on connecting people and scaling communities faster.
+• Led a team of 7 to design and ship a software product, “0 Unveiled,” delivered in just 15 days.
+KEY PROJECTS
+HRMS Platform (Java) — JWT authentication & authorization with role and permission management for HR workflows.
+CLCRM — Commercial Landing (Java) — Built and refined backend CRM modules. stagingfe.wealthmaxcommercial.co.uk
+P&M CRM SaaS (.NET) — Developed multiple standalone modules and granular role-based permissions.
+Production Support & Email APIs — Fixed live production issues and built email-sending APIs. myzone.wealthmax.co.uk ·
+wealthmax.co.uk
+EDUCATION
+Bachelor's in Computer Science — YCET, Jammu Sep 2021 – Aug 2025
+Akhnoor Road, Patoli, Jammu
+Senior Secondary (12th) — M.L Higher Secondary School, Udhampur 2020 – 2021
+Matriculation (10th) — E.G.M.A, Udhampur 2018 – 2019
+CERTIFICATIONS
+Python 3.4.3, C++ & HTML — IIT Bombay · Web Development Summer Training — IIT Jammu · Introduction to IoT &
+Environmental Science — IIT Kharagpur
+ACHIEVEMENTS & ACTIVITIES
+E-SDP Entrepreneurship Workshop — IIT Jammu · Capital Building Program (Small Business) — IIM Jammu · Summer
+Internship in IoT — IIT Jammu · Code-a-thon — IMS Jammu · 3D Printing Course — IIT Jammu

@@ -1,60 +1,170 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Card UI Design</title>
-
-
-<link rel="stylesheet" href="style.css">
-<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sarthak Sharma · Backend Developer</title>
+  <meta name="description" content="Sarthak Sharma, Backend Developer: Java (Java 8, Spring Boot) and .NET. REST APIs, database design, JWT-based authentication and authorization, and debugging live production systems.">
+  <meta name="theme-color" content="#c8202a">
+  <meta property="og:title" content="Sarthak Sharma · Backend Developer">
+  <meta property="og:description" content="Java (Java 8, Spring Boot) and .NET. REST APIs, JWT auth, CRM, HRMS and commercial SaaS platforms.">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <script>try{var t=localStorage.getItem('sarthak-portfolio.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
-    <div class="profile-card">
-        <div class="image">
-        <img src="./IMG_20230721_132959.jpg" alt="Profile" class="profile-img">
-        </div>
-     <div class="text-data">
-        <span class="name">Sarthak Sharma</span>
-        <span class="job">B Tech Student</span>
-     </div>
-     <div class="btn">
-     <a href="#" style="background: #4267b2" class="link">
-        <i class='bx bxl-facebook-circle' ></i>
-     </a>
-     <a href="#" style="background: #1da1f2" class="link">
-        <i class='bx bxl-twitter'></i>
-     </a>
-     <a href="#" style="background: #e1306c"class="link">
-        <i class='bx bxl-instagram'></i>
-     <a href="#" style="background: #ff0000"class="link">
-        <i class='bx bxl-youtube'></i>
-     </a>
-     
-     </a>
-     </div>
-     <div class="buttons">
-        <button class="b1">Subscribe</button>
-        <button class="b1">Message</button>
-     </div>
-     <div class="analytics">
-     <div class="data">
-        <i class='bx bx-heart'></i>
-<span class="number">100k</span>
- 
-<div class="data">
-    <i class='bx bx-message-dots'></i>
-<span class="number">10k</span>
+  <a class="skip" href="#main">Skip to content</a>
 
-<div class="data">
-    <i class='bx bx-share'></i>
-<span class="number">5k</span>
-
-
-
-     </div>
-</div>
+  <header class="topbar">
+    <a class="brand" href="./">Sarthak Sharma</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#education">Education</a>
+      <a href="#terminal">Terminal</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="topbar-tools">
+      <button class="hang-up" type="button" hidden>Hang him back up</button>
+      <button class="tray" type="button" aria-haspopup="menu" title="Spidey's menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1"/><path d="M12 6.5 15.9 8.1 17.5 12 15.9 15.9 12 17.5 8.1 15.9 6.5 12 8.1 8.1Z"/><path d="M12 9.7 13.6 10.4 14.3 12 13.6 13.6 12 14.3 10.4 13.6 9.7 12 10.4 10.4Z"/></g></svg>
+        <span class="visually-hidden">Open Spidey's menu</span>
+      </button>
+      <button class="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M20.2 14.6A8.5 8.5 0 0 1 9.4 3.8a8.5 8.5 0 1 0 10.8 10.8Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>
+      </button>
     </div>
-    
+  </header>
+
+  <main id="main" class="wrap">
+    <!-- Hero -------------------------------------------------------------------------------------->
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <p class="kicker">Java (Primary) · Spring Boot · .NET · Node.js</p>
+        <h1 id="hero-title" class="shout">Sarthak<span>Sharma.</span></h1>
+        <p class="role-line">Backend Developer</p>
+        <p class="lede"><!-- render:lede --></p>
+        <div class="cta">
+          <a class="btn btn-gold" href="#contact">Email me</a>
+          <a class="btn btn-paper" href="#projects">See my work</a>
+          <a class="btn btn-paper" href="Sarthak_Sharma_Backend_Developer.pdf" download="Sarthak_Sharma_Backend_Developer.pdf">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg>Download Resume</a>
+        </div>
+        <p class="fineprint"><!-- render:contactLine --></p>
+      </div>
+      <div class="panel hero-card" aria-hidden="true">
+        <span class="sfx">THWIP!</span>
+        <header><i></i><i class="gold"></i><i class="green"></i>&nbsp; GET /api/sarthak</header>
+<pre>{
+  <span class="k">"name"</span>: <span class="s">"Sarthak Sharma"</span>,
+  <span class="k">"role"</span>: <span class="s">"Backend Developer"</span>,
+  <span class="k">"company"</span>: <span class="s">"Wealthmax"</span>,
+  <span class="k">"since"</span>: <span class="s">"Jul 2025"</span>,
+  <span class="k">"stack"</span>: [<span class="s">"Java 8"</span>, <span class="s">"Spring Boot"</span>,
+            <span class="s">".NET"</span>, <span class="s">"Node.js"</span>],
+  <span class="k">"location"</span>: <span class="s">"Udhampur, J&amp;K, India"</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- About: Professional Summary -------------------------------------------------------------->
+    <section id="about" class="section" aria-labelledby="about-title" data-say="Production bugs? He squashes them faster than I web a bad guy.">
+      <header class="section-head">
+        <p class="kicker">Professional summary</p>
+        <h2 id="about-title" class="shout shout-md">Keeps prod alive.</h2>
+        <p><!-- render:summary --></p>
+      </header>
+      <div class="panel stats">
+        <!-- render:facts -->
+      </div>
+    </section>
+
+    <!-- Technical Skills ------------------------------------------------------------------------>
+    <section id="skills" class="section" aria-labelledby="skills-title" data-say="Java's his main suit. .NET is the backup.">
+      <header class="section-head">
+        <p class="kicker">Technical skills</p>
+        <h2 id="skills-title" class="shout shout-md">Tools of the trade.</h2>
+      </header>
+      <div class="stack">
+        <!-- render:skills -->
+      </div>
+    </section>
+
+    <!-- Experience ------------------------------------------------------------------------------>
+    <section id="experience" class="section" aria-labelledby="experience-title" data-say="Wealthmax since July 2025. Still swinging.">
+      <header class="section-head">
+        <p class="kicker">Experience</p>
+        <h2 id="experience-title" class="shout shout-md">The story so far.</h2>
+      </header>
+      <div class="timeline">
+        <!-- render:experience -->
+      </div>
+    </section>
+
+    <!-- Key Projects ---------------------------------------------------------------------------->
+    <section id="projects" class="section" aria-labelledby="projects-title" data-say="Every one of these is live. With users. Scary.">
+      <header class="section-head">
+        <p class="kicker">Key projects</p>
+        <h2 id="projects-title" class="shout shout-md">Shipped to prod.</h2>
+      </header>
+      <div class="projects">
+        <!-- render:projects -->
+      </div>
+    </section>
+
+    <!-- Education, Certifications, Achievements ------------------------------------------------->
+    <section id="education" class="section" aria-labelledby="education-title" data-say="IIT, IIM, code-a-thons... busy guy.">
+      <header class="section-head">
+        <p class="kicker">Education · certifications · achievements</p>
+        <h2 id="education-title" class="shout shout-md">Training montage.</h2>
+      </header>
+      <div class="edu">
+        <div class="panel"><h3>Education</h3><ul>
+          <!-- render:education -->
+        </ul></div>
+        <div class="panel"><h3>Certifications</h3><ul>
+          <!-- render:certifications -->
+        </ul></div>
+        <div class="panel wide"><h3>Achievements &amp; Activities</h3><ul>
+          <!-- render:achievements -->
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Terminal -------------------------------------------------------------------------------->
+    <section id="terminal" class="section" aria-labelledby="terminal-title" data-say="Type 'swing' in there. I dare you.">
+      <header class="section-head">
+        <p class="kicker">Terminal</p>
+        <h2 id="terminal-title" class="shout shout-md">Talk to Spidey.</h2>
+        <p>A tiny CLI over my résumé. Some commands answer you; some move him.</p>
+      </header>
+      <div class="panel term">
+        <header>sarthak@portfolio:~</header>
+        <div class="term-out" data-term-out role="log" aria-live="polite"></div>
+        <form data-term-form><label for="cmd">$</label><input id="cmd" data-term-input autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="try: help"></form>
+      </div>
+      <div class="chips-row" data-term-chips>
+        <button type="button">whoami</button><button type="button">skills</button><button type="button">curl /api/experience</button><button type="button">projects</button><button type="button">fact</button><button type="button">swing</button><button type="button">say hello</button><button type="button">contact</button>
+      </div>
+    </section>
+
+    <!-- Contact --------------------------------------------------------------------------------->
+    <section id="contact" class="panel contact" aria-labelledby="contact-title" data-say="Go on. He answers email.">
+      <h2 id="contact-title" class="shout">Let's build something.</h2>
+      <p>Udhampur, J&amp;K 182101, India</p>
+      <div class="cta">
+        <!-- render:contactButtons -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Built with Node + Vite · Iron Spidy from <a href="https://github.com/sarthakctrl/spidey-hang-site" target="_blank" rel="noopener">Spidey Hang</a> · © 2026 Sarthak Sharma
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>
