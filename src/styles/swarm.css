@@ -1,0 +1,220 @@
+/*
+ * The swarm build, in the comic's colours: speech-bubble blue selections with halftone placeholders,
+ * suit-red guides and measurements, ink rulers, and a toolbar that is one more comic panel.
+ */
+
+/* Before the swarm script runs, the page waits blank (index.html's <head> sets this; it times out). */
+.swarm-pending .topbar, .swarm-pending main, .swarm-pending .footer { opacity: 0; }
+
+/*
+ * Layers not built yet. Opacity only, so nothing moves and the page stays readable to assistive tech;
+ * not clickable while invisible (keyboard focus still reaches them, and builds them at once).
+ */
+.sw-wait { opacity: 0 !important; pointer-events: none; }
+.sw-in { animation: sw-in 0.24s ease-out; }
+@keyframes sw-in { from { opacity: 0; } }
+
+/* Text not typed yet: still in the page, holding its place, but invisible. */
+.sw-ghost {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke-color: transparent !important;
+  text-shadow: none !important;
+}
+.sw-typing a, .sw-typing.btn, a.sw-typing { text-decoration-color: transparent; }
+.sw-caret { position: relative; }
+.sw-caret::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--bubble);
+  animation: sw-blink 0.9s steps(1) infinite;
+}
+@keyframes sw-blink { 50% { opacity: 0; } }
+
+/* Spidey waits off-page until the swarm is done, then drops in. */
+.swarm-building .spidey-layer, .swarm-building body > .bubble { display: none; }
+
+/* ---- The overlay ------------------------------------------------------------------------------ */
+
+.sw-root { position: fixed; inset: 0; z-index: 45; pointer-events: none; overflow: hidden; }
+.sw-root.sw-gone .sw-agents { opacity: 0; transition: opacity 0.4s; }
+
+.sw-ruler { position: absolute; background-color: var(--ink); color: rgba(255, 255, 255, 0.7); font: 600 9px/1 var(--font-mono); overflow: hidden; transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.sw-ruler-top {
+  left: 0; right: 0; top: 0; height: 20px;
+  background-image:
+    repeating-linear-gradient(to right, rgba(255, 255, 255, 0.45) 0 1px, transparent 1px 100px),
+    repeating-linear-gradient(to right, rgba(255, 255, 255, 0.28) 0 1px, transparent 1px 10px);
+  background-size: 100% 100%, 100% 5px;
+  background-position: 0 0, 0 100%;
+  background-repeat: no-repeat;
+  transform: translateY(-100%);
+}
+.sw-ruler-left {
+  left: 0; top: 0; bottom: 0; width: 20px;
+  background-image: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.28) 0 1px, transparent 1px 10px);
+  background-size: 5px 100%;
+  background-position: 100% 0;
+  background-repeat: no-repeat;
+  transform: translateX(-100%);
+}
+.sw-ruler b { position: absolute; top: 3px; left: 0; font-weight: 600; white-space: nowrap; transform-origin: 0 0; }
+.sw-ruler-left b { top: 0; left: 4px; }
+.sw-band { position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: rgba(10, 132, 255, 0.55); }
+.sw-band[hidden] { display: none; }
+.sw-corner { position: absolute; left: 0; top: 0; width: 20px; height: 20px; background: var(--suit-red); border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); transform: scale(0); transition: transform 0.3s; }
+.sw-root:not(.sw-finish) .sw-ruler { transform: none; }
+.sw-root:not(.sw-finish) .sw-corner { transform: none; }
+
+.sw-guide { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; background: var(--suit-red); transition: opacity 0.3s; }
+.sw-guide[hidden] { display: none; }
+.sw-guide .sw-badge { top: 26px; left: 4px; transform: none; background: var(--suit-red); }
+.sw-finish .sw-guide { opacity: 0; }
+
+.sw-emblem { position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; border: 3px solid var(--ink); border-radius: 50%; background: var(--white); box-shadow: 4px 4px 0 var(--ink); opacity: 0; transform: scale(0.4); transition: opacity 0.3s, transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.sw-intro .sw-emblem { opacity: 1; transform: none; }
+
+/* ---- Marks ------------------------------------------------------------------------------------ */
+
+.sw-marks, .sw-agents { position: absolute; inset: 0; }
+.sw-mark { position: absolute; left: 0; top: 0; transition: opacity 0.2s; }
+.sw-mark.sw-out { opacity: 0; }
+.sw-mark .h { display: none; position: absolute; width: 7px; height: 7px; background: var(--white); border: 1.5px solid var(--bubble); }
+.sw-mark .tl { left: -4px; top: -4px; }
+.sw-mark .tr { right: -4px; top: -4px; }
+.sw-mark .bl { left: -4px; bottom: -4px; }
+.sw-mark .br { right: -4px; bottom: -4px; }
+.sw-badge {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 7px);
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  background: var(--bubble);
+  color: var(--white);
+  font: 700 10.5px/1.3 var(--font-mono);
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.sw-badge[hidden] { display: none; }
+
+.sw-draw {
+  outline: 2px solid var(--bubble);
+  background:
+    radial-gradient(rgba(10, 132, 255, 0.32) 1.3px, transparent 1.5px) 0 0 / 9px 9px,
+    rgba(10, 132, 255, 0.07);
+}
+.sw-draw .h, .sw-select .h { display: block; }
+.sw-draw.sw-set { background: none; }
+.sw-select { outline: 2px solid var(--bubble); }
+.sw-select .sw-badge { display: none; }
+.sw-text { outline: 1.5px solid var(--bubble); }
+.sw-clone {
+  outline: 2px dashed var(--suit-red);
+  background:
+    radial-gradient(rgba(200, 32, 42, 0.28) 1.3px, transparent 1.5px) 0 0 / 9px 9px,
+    rgba(200, 32, 42, 0.05);
+}
+.sw-clone .sw-badge { top: -26px; background: var(--suit-red); }
+
+/* ---- Cursors ---------------------------------------------------------------------------------- */
+
+.sw-agent { position: absolute; left: 0; top: 0; will-change: transform; filter: drop-shadow(1.5px 1.5px 0 rgba(14, 14, 20, 0.55)); }
+.sw-shape { display: block; width: 26px; height: 26px; }
+.sw-shape svg { display: block; }
+.sw-name {
+  position: absolute;
+  left: 18px;
+  top: 21px;
+  padding: 1px 7px 2px;
+  border: 1.5px solid var(--ink);
+  border-radius: 3px 10px 10px 10px;
+  background: var(--c);
+  color: var(--white);
+  font: 700 11px/1.3 var(--font-body);
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 rgba(14, 14, 20, 0.45);
+}
+
+/* ---- Toolbar ---------------------------------------------------------------------------------- */
+
+.sw-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 24px);
+  padding: 8px 10px 8px 12px;
+  background: var(--panel);
+  color: var(--text);
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 5px 5px 0 var(--shadow-color);
+  font: 600 0.8rem/1.2 var(--font-mono);
+  transform: translateX(-50%);
+  transition: transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.25s, visibility 0s;
+}
+/* Folded away: out of sight and out of the Tab order (visibility goes once the slide-out ends). */
+.sw-bar.sw-folded { opacity: 0; visibility: hidden; transform: translate(-50%, 160%); pointer-events: none; transition-delay: 0s, 0s, 0.35s; }
+.sw-faces { display: flex; }
+.sw-faces i {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-left: -6px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--c);
+  color: var(--white);
+  font: 700 10px/1 var(--font-body);
+  font-style: normal;
+}
+.sw-faces i:first-child { margin-left: 0; }
+.sw-stat { white-space: nowrap; color: var(--text-soft); }
+.sw-stat b { color: var(--text); }
+.sw-progress { flex: none; width: 90px; height: 10px; border: 2px solid var(--ink); background: var(--panel-warm); overflow: hidden; border-radius: 2px; }
+.sw-progress i { display: block; height: 100%; width: 0; background: var(--suit-red); transition: width 0.25s; }
+.sw-summary { white-space: nowrap; }
+.sw-summary[hidden] { display: none; }
+.sw-finished .sw-faces, .sw-finished .sw-stat, .sw-finished .sw-progress { display: none; }
+.sw-buttons { display: flex; gap: 6px; }
+.sw-bar button, .sw-rebuild {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--ink);
+  font: 700 0.8rem/1 var(--font-body);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+}
+.sw-bar button[hidden] { display: none; }
+.sw-bar button[aria-pressed='true'] { background: var(--gold); }
+.sw-bar button[data-act='skip'], .sw-bar button[data-act='replay'] { background: var(--suit-red); color: var(--white); }
+.sw-bar button:active, .sw-rebuild:active { transform: translate(2px, 2px); box-shadow: none; }
+.sw-rebuild { position: fixed; left: 14px; bottom: 14px; z-index: 60; display: inline-flex; gap: 6px; align-items: center; background: var(--gold); }
+.sw-rebuild[hidden] { display: none; }
+
+@media (max-width: 720px) {
+  .sw-bar { gap: 8px; bottom: 10px; }
+  .sw-faces, .sw-progress, .sw-bar [data-act='sound'] { display: none; }
+  .sw-ruler, .sw-corner { display: none; }
+  .sw-name { display: none; }
+}
+@media (max-width: 420px) {
+  .sw-layers { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sw-in, .sw-caret::after { animation: none; }
+}

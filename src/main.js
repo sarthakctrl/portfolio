@@ -1,10 +1,12 @@
 /*
- * The portfolio page: Iron Spidy hanging over the whole page (spidey-hang-site's HangingSpidey, menu and
- * settings, unchanged in src/overlay/ and vendor/spidey/), plus what this site adds: his guide lines,
- * the résumé showcase every couple of minutes, and the terminal.
+ * The portfolio page: a swarm of multiplayer cursors builds it as you scroll (src/swarm/), then Iron Spidy
+ * drops in over the whole page (spidey-hang-site's HangingSpidey, menu and settings, unchanged in
+ * src/overlay/ and vendor/spidey/), with what this site adds: his guide lines, the résumé showcase every
+ * couple of minutes, and the terminal.
  */
 import './fonts.js';
 import './styles/site.css';
+import './styles/swarm.css';
 import { reminders } from '../vendor/spidey/index.js';
 import { SettingsStore, SITE_HEROES } from './overlay/settings-store.js';
 import { HangingSpidey } from './overlay/hanging-spidey.js';
@@ -14,6 +16,7 @@ import { initTheme } from './theme.js';
 import { initGuide } from './sections/guide.js';
 import { createShowcase } from './sections/showcase.js';
 import { initTerminal } from './sections/terminal.js';
+import { createSwarm } from './swarm/engine.js';
 
 const settings = new SettingsStore();
 const refreshers = [];
@@ -113,17 +116,80 @@ refreshers.push(() => {
 
 initTheme(document.querySelector('.theme-toggle'));
 
-initGuide({ spidey, hello: "Hey! I'm showing you around Sarthak's work. Grab me!" });
+// While the swarm rebuilds the page Spidey is hidden, so nothing he would say could be seen.
+const building = () => document.documentElement.classList.contains('swarm-building');
 
 const showcase = createShowcase({
   facts: resume.showcase,
   speak: (text) => actions.say(text),
-  canSpeak: () => spidey.up && !spidey.bubble.visible && !document.hidden,
+  canSpeak: () => spidey.up && !spidey.bubble.visible && !document.hidden && !building(),
 });
-showcase.start();
 
 initTerminal({ resume, actions, settings, showcase });
 refresh();
+
+// The swarm builds the page first; Spidey (hidden meanwhile) drops in when it is done and starts guiding.
+const SWARM_KEY = 'sarthak-portfolio.swarm';
+const remember = (value) => {
+  try {
+    if (value) {
+      localStorage.setItem(SWARM_KEY, value);
+    } else {
+      localStorage.removeItem(SWARM_KEY);
+    }
+  } catch {
+    // Storage refused: the choice lasts until the page closes.
+  }
+};
+let guiding = false;
+/** reason: how the build ended ('built', 'skipped', 'failed'), or undefined when there was no build. */
+function wakeSpidey({ reason } = {}) {
+  if (reason === 'skipped') {
+    remember('off'); // they chose to skip it: next visit opens on the finished page, with a Rebuild button
+  }
+  if (spidey.up) {
+    spidey.reset();
+    spidey.push(1.2);
+  }
+  if (!guiding) {
+    guiding = true;
+    initGuide({ spidey, hello: "Hey! I'm showing you around Sarthak's work. Grab me!", quiet: building });
+    showcase.start();
+  }
+}
+// What the swarm builds on this page: boxes it drags out (then types their own text into), text blocks it
+// types, where to look, what stays stuck to the top, and what the red guide lines up with.
+const swarm = createSwarm({
+  layers: {
+    box: [
+      '.topbar', '.panel', '.btn', '.chip', '.chips-row button', '.job .when', '.proj .req', '.proj .res',
+      '.hero-card > header', '.term > header', '.tray', '.theme-toggle',
+    ].join(','),
+    text: [
+      'h1', 'h2', 'h3', 'p', 'li', 'pre', '.brand', '.topnav a', '.stats b', '.stats span', '.job .when b',
+      '.sfx', '.footer', '.term-out', '.term label',
+    ].join(','),
+    scope: '.topbar, main, .footer',
+    sticky: '.topbar',
+    guide: 'main',
+  },
+  onDone: wakeSpidey,
+  onStart: () => {
+    remember(null);
+    spidey.bubble.hide();
+  },
+});
+// index.html's <head> decides (before the first paint) whether this visit builds. Visitors who asked for
+// less motion, or for no swarm (?noswarm), are not offered the Rebuild button either.
+const motionOk = !matchMedia('(prefers-reduced-motion: reduce)').matches && !/[?&]noswarm\b/.test(location.search);
+if (document.documentElement.classList.contains('swarm-pending')) {
+  swarm.start();
+} else {
+  if (motionOk) {
+    swarm.offer();
+  }
+  wakeSpidey();
+}
 
 // For checks in the browser: what he is doing, like spidey-hang-site's window.__spideyState.
 window.__spideyState = () => ({
@@ -135,3 +201,4 @@ window.__spideyState = () => ({
   showcase: showcase.on,
 });
 window.__showcaseTick = () => showcase.tick();
+window.__swarmState = () => swarm.state();
