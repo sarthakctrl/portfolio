@@ -5,8 +5,8 @@
 My portfolio as a Backend Developer: Java (Java 8, Spring Boot) and .NET, REST APIs, database design,
 JWT-based authentication and authorization, and debugging live production systems.
 
-The page builds itself: when it opens, a swarm of multiplayer cursors (Miles, Gwen, Peter and the rest of
-the crew) rebuilds it in front of you as you scroll. They drag out boxes with a live W × H badge, type
+The page builds itself: when it opens, a swarm of multiplayer cursors (JARVIS, FRIDAY, EDITH and the rest of
+Tony Stark's AIs) rebuilds it in front of you as you scroll. They drag out boxes with a live W × H badge, type
 every line, ⌥-drag copies of cards and chips, and pull a red guide off the rulers. **Tour** scrolls at their
 pace, **1× / 2× / 3×** sets the speed, **Sound** turns on synthesised clicks, and **Skip** (or Esc) shows the
 finished page. Visitors who skip get the finished page next time, with a **Rebuild** button; reduced

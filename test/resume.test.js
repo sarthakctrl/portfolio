@@ -24,10 +24,19 @@ function pageText() {
 
 const DATES = /\s*((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} – (Present|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4})|\d{4} – \d{4})$/;
 
+/**
+ * Résumé lines left off the site on purpose (the PDF still has them): the Sambodhan role, which Sarthak
+ * asked to take off the portfolio.
+ */
+const LEFT_OFF = ['Co-Founder — Sambodhan', 'Co-founded a networking platform', 'Led a team of 7'];
+
 /** Each line of the résumé cut at its separators (bullets, ·, |, —, labels, list commas), dates split off. */
 function resumePieces() {
   const pieces = [];
   for (const line of read('./fixtures/resume.txt').split('\n')) {
+    if (LEFT_OFF.some((text) => line.includes(text))) {
+      continue;
+    }
     // A link follows its project's sentence on the same line ("… modules. stagingfe.…"); split there too.
     for (let piece of line.split(/•|\s·\s?|\s\|\s|\s—\s|:\s|,\s(?=[A-Z0-9.])|(?<=\.)\s(?=[a-z]+\.[a-z])/)) {
       piece = piece.trim();
@@ -66,4 +75,10 @@ test('the résumé PDF the button downloads is in the site', () => {
   const html = read('../index.html');
   assert.match(html, /href="Sarthak_Sharma_Backend_Developer\.pdf" download/);
   assert.ok(readFileSync(new URL('../public/Sarthak_Sharma_Backend_Developer.pdf', import.meta.url)).subarray(0, 4).toString() === '%PDF');
+});
+
+test('the Sambodhan role is off the site', () => {
+  const page = pageText();
+  assert.ok(!page.includes('sambodhan'), 'no Sambodhan anywhere on the page');
+  assert.ok(!JSON.stringify(resume.showcase).toLowerCase().includes('sambodhan'), 'Spidey never brings it up');
 });

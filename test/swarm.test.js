@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   planTasks, isReady, pickTask, chainOf, typingPace, agentTarget, gapLabel, travelMs, MIN_AGENTS, MAX_AGENTS, LOOKAHEAD,
+  SPHERE, nodeSphere, sphereSpin, projectSphere, spherePoint, sphereNode,
 } from '../src/swarm/plan.js';
 
 /** A layer as engine.js measures one. */
@@ -100,4 +101,33 @@ test('the page waits blank only when the swarm will run, and never for reduced m
   assert.match(head, /prefers-reduced-motion: reduce/);
   assert.match(head, /classList\.add\('swarm-pending'\)/);
   assert.match(head, /setTimeout\(function\(\)\{d\.classList\.remove\('swarm-pending'\)\}/, 'no fallback if the script fails');
+});
+
+test('the sphere has one node per cursor, joined into a closed web of triangles', () => {
+  const { vertices, edges } = SPHERE;
+  assert.equal(vertices.length, MAX_AGENTS, 'a node for every cursor the swarm can have');
+  assert.equal(edges.length, 3 * vertices.length - 6, 'a full triangulation of the sphere (Euler)');
+  for (const v of vertices) {
+    assert.ok(Math.abs(Math.hypot(...v) - 1) < 1e-9);
+  }
+  const degree = new Array(vertices.length).fill(0);
+  edges.forEach(([a, b]) => { degree[a]++; degree[b]++; });
+  assert.ok(Math.min(...degree) >= 3, 'every node is linked to at least three neighbours');
+  const lengths = edges.map(([a, b]) => Math.hypot(...vertices[a].map((c, k) => c - vertices[b][k])));
+  assert.ok(Math.max(...lengths) / Math.min(...lengths) < 2, 'struts are roughly even');
+  assert.equal(nodeSphere(26).vertices.length, 26, 'it grows with the crew');
+});
+
+test('idle cursors ride distinct nodes of a turning globe, passing round the back', () => {
+  const r = 100;
+  const nodes = Array.from({ length: MAX_AGENTS }, (_, i) => sphereNode(i));
+  assert.equal(new Set(nodes).size, MAX_AGENTS, 'a full crew fills every node, none shared');
+  for (const clock of [0, 2500, 9999]) {
+    const p = spherePoint(3, clock, r);
+    assert.ok(Math.abs(Math.hypot(p.x / r, p.y / r, p.z) - 1) < 1e-9, 'turning keeps it on the sphere');
+  }
+  const zs = Array.from({ length: 40 }, (_, k) => spherePoint(0, k * 350, r).z);
+  assert.ok(Math.min(...zs) < 0 && Math.max(...zs) > 0, 'a turn takes it behind and in front');
+  const a = projectSphere([0, -1, 0], sphereSpin(0), r); // screen y points down: -1 is the top pole
+  assert.ok(a.y < 0 && a.z > 0, 'the globe tips its top toward the viewer');
 });

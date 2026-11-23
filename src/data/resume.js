@@ -25,8 +25,8 @@ export const resume = {
   facts: [
     { big: 'Jul 2025', small: 'Backend Developer at Wealthmax' },
     { big: '6 months', small: 'MERN Stack internship, Solitaire Infosys' },
-    { big: '7', small: 'person team led at Sambodhan' },
-    { big: '15 days', small: 'to ship “0 Unveiled”' },
+    { big: '3', small: 'Wealthmax platforms: HRMS, CLCRM and P&M CRM' },
+    { big: '8', small: 'languages, with Java first' },
   ],
 
   skills: [
@@ -66,16 +66,6 @@ export const resume = {
       points: [
         'Completed a 6-month internship building full-stack web applications with MongoDB, Express.js, React, and Node.js.',
         'Developed responsive interfaces and REST APIs, strengthening end-to-end full-stack fundamentals.',
-      ],
-    },
-    {
-      tag: 'Founder',
-      title: 'Co-Founder',
-      company: 'Sambodhan',
-      dates: 'Feb 2024 – Present',
-      points: [
-        'Co-founded a networking platform focused on connecting people and scaling communities faster.',
-        'Led a team of 7 to design and ship a software product, “0 Unveiled,” delivered in just 15 days.',
       ],
     },
   ],
@@ -136,7 +126,6 @@ export const resume = {
       'Role-based permissions for the Protection & Mortgage (P&M) CRM SaaS, built in .NET? That was him.',
       'He debugs and resolves production issues across live applications.',
       'Before Wealthmax: a 6-month MERN Stack internship at Solitaire Infosys.',
-      'Co-Founder of Sambodhan. He led a team of 7 to ship “0 Unveiled” in just 15 days!',
     ],
     skills: [
       'His main suit: Java (Primary), with Java 8 and Spring Boot.',

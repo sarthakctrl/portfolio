@@ -2,7 +2,8 @@
  * The swarm build: the page starts blank and a crew of multiplayer cursors builds it back as you scroll.
  * Boxes are dragged out with a crosshair and a live W × H badge, text is typed with an I-beam, repeated
  * cards and chips are ⌥-dragged out of the first one, and a red guide comes off the ruler first. When the
- * last layer lands the cursors flock to your mouse and leave, and onDone() hands the page to Spidey.
+ * last layer lands the crew gathers into a holographic globe that implodes and bursts, and onDone()
+ * hands the page to Spidey.
  *
  * The page underneath is the real one the whole time: layers are only faded out (opacity), so text and
  * search stay intact, and focusing something not built yet shows it at once. If anything goes wrong the
@@ -21,15 +22,19 @@
  */
 import {
   planTasks, isReady, pickTask, chainOf, typingPace, agentTarget, gapLabel, travelMs,
+  SPHERE, sphereSpin, projectSphere, spherePoint, sphereNode, MAX_AGENTS,
 } from './plan.js';
-import { CREW, cursorSvg, HOTSPOT } from './cursors.js';
+import { CREW, cursorSvg, HOTSPOT, CURSOR_STYLE } from './cursors.js';
 import { createSound } from './sound.js';
 import { createToolbar } from './toolbar.js';
 import { createTyper, ownText, HIDDEN } from './typer.js';
 import { createRulers } from './rulers.js';
 
-const INTRO_MS = 1300;
-const FLOCK_MS = 2200;
+const INTRO_MS = 1900;
+/** The finale: the crew gathers into the globe, holds, then it implodes and bursts. */
+const GATHER_MS = 1700;
+const IMPLODE_MS = 520;
+const BURST_MS = 520;
 /**
  * With work ready and nothing landing for this long, something is wrong: show the finished page.
  * Swarm time, which stands still while the tab is hidden, so coming back to the tab never trips it.
@@ -65,6 +70,12 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
   let announcer = null;
   let rulers = null;
   let toolbar = null;
+  let globe = null;
+  /** The globe shows whatever the cursors are doing (the intro and the finale), not only when idle. */
+  let globeShow = false;
+  /** The globe's size (1 normal; the finale shrinks it to 0) and its burst ring (0..1 while bursting). */
+  let globeScale = 1;
+  let burst = 0;
 
   let tasks = [];
   let byId = new Map();
@@ -94,7 +105,6 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
   let guideX = null;
   let remeasure = false;
   let guidePad = 0;
-  const mouse = { x: 0, y: 0, seen: false };
 
   // Element boxes, cached for one frame. The swarm's own writes (text typed into ghosts, opacity) never
   // move anything, so a box measured once a frame stays right for the rest of it.
@@ -295,7 +305,7 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
   function spawn(at) {
     const [name, color] = CREW[agents.length % CREW.length];
     const el = document.createElement('div');
-    el.className = 'sw-agent';
+    el.className = `sw-agent sw-agent-${CURSOR_STYLE}`;
     el.style.setProperty('--c', color);
     el.innerHTML = `<span class="sw-shape"></span><span class="sw-name">${name}</span>`;
     agentsLayer.append(el);
@@ -310,15 +320,37 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
       y: at.y,
       /** The caret this cursor is typing at, if any: the frame puts the cursor on it. */
       follow: null,
+      /** Riding the globe with nothing to do; depth is where on it (-1 far side, 1 near side). */
+      idle: false,
+      depth: 0,
+      /** On its node: from then on every frame draws it exactly there, however you scroll. */
+      pinned: false,
+      /** Drawn depth, eased toward `depth` while idle and back to 0 (normal size) while working. */
+      shown: 0,
       setShape(shape) {
         if (agent.shape !== shape) {
           agent.shape = shape;
           shapeEl.innerHTML = cursorSvg(shape, color);
+          const [hx, hy] = HOTSPOT[shape] || HOTSPOT.arrow;
+          el.style.transformOrigin = `${hx}px ${hy}px`;
         }
       },
       draw() {
         const [hx, hy] = HOTSPOT[agent.shape] || HOTSPOT.arrow;
-        el.style.transform = `translate3d(${agent.x - scrollX - hx}px, ${agent.y - scrollY - hy}px, 0)`;
+        if (!agent.idle) {
+          agent.pinned = false;
+        } else if (agent.pinned) {
+          // Read at draw time, with this frame's scroll and turn, so it moves with its node exactly.
+          const spot = globeSpot(agent);
+          agent.depth = spot.z;
+          agent.x = spot.x + scrollX;
+          agent.y = spot.y + scrollY;
+        }
+        agent.shown = lerp(agent.shown, agent.idle ? agent.depth : 0, 0.15);
+        const d = agent.shown;
+        el.style.transform = `translate3d(${agent.x - scrollX - hx}px, ${agent.y - scrollY - hy}px, 0) scale(${(1 + d * 0.2).toFixed(3)})`;
+        el.style.opacity = (0.8 + d * 0.2).toFixed(3);
+        el.style.zIndex = agent.idle ? String(Math.round(d * 10) + 10) : '30';
       },
     };
     agent.setShape('arrow');
@@ -500,13 +532,17 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
       const task = pickTask(tasks, {
         done,
         claimed,
+        // Only what is on screen (and just below) is open for work: the page builds as you scroll.
         viewBottom: scrollY + innerHeight,
         from: { x: agent.x, y: agent.y },
       });
       if (!task) {
+        agent.idle = true;
         await idle(agent, my);
         continue;
       }
+      agent.idle = false;
+      agent.pinned = false;
       claimed.add(task.id);
       try {
         if (task.kind === 'dup') {
@@ -523,18 +559,143 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
     }
   }
 
-  /** Nothing to do: drift about the lower middle of the screen for a moment, then look again. */
+  /** The globe's radius; it sits in the middle of the screen, wherever you scrolled. */
+  const globeRadius = () => Math.min(innerWidth, innerHeight) * 0.16 * globeScale;
+
+  /** Where a cursor's own node of the globe is now, in screen pixels (the globe is fixed to the screen). */
+  function globeSpot(agent) {
+    const p = spherePoint(agent.index, clock, globeRadius());
+    return { x: innerWidth / 2 + p.x, y: innerHeight / 2 + p.y, z: p.z };
+  }
+
+  /**
+   * Eases a cursor toward its own node of the globe (pull: how much of the way, per frame), in screen
+   * space so scrolling never leaves it behind. Once it is there it is pinned: draw() keeps it on the node.
+   */
+  function seat(agent, pull) {
+    if (agent.pinned) {
+      return;
+    }
+    const spot = globeSpot(agent);
+    agent.depth = spot.z;
+    const sx = lerp(agent.x - scrollX, spot.x, pull);
+    const sy = lerp(agent.y - scrollY, spot.y, pull);
+    agent.x = sx + scrollX;
+    agent.y = sy + scrollY;
+    if (Math.hypot(sx - spot.x, sy - spot.y) < 6) {
+      agent.pinned = true;
+    }
+  }
+
+  /**
+   * Nothing to do: ride a node of the holographic globe for a moment, then look again. Each idle cursor
+   * has its own node, so together they turn with the globe in the middle of the screen.
+   */
   async function idle(agent, my) {
     agent.setShape('arrow');
-    const angle = agent.index * 2.4 + clock / 1400;
-    const target = {
-      x: scrollX + innerWidth * 0.5 + Math.cos(angle) * innerWidth * 0.22,
-      y: scrollY + innerHeight * 0.62 + Math.sin(angle) * innerHeight * 0.14,
-    };
-    await tween(260, () => {
-      agent.x = lerp(agent.x, target.x, 0.06);
-      agent.y = lerp(agent.y, target.y, 0.06);
-    }, my);
+    await tween(260, () => seat(agent, 0.14), my);
+  }
+
+  /** A soft glowing dot, drawn once and stamped on every node of the globe. */
+  function glowSprite() {
+    const size = 32;
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = size;
+    const g = sprite.getContext('2d');
+    const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    grad.addColorStop(0, 'rgba(235, 252, 255, 1)');
+    grad.addColorStop(0.18, 'rgba(140, 230, 255, 0.95)');
+    grad.addColorStop(0.45, 'rgba(40, 190, 255, 0.35)');
+    grad.addColorStop(1, 'rgba(40, 190, 255, 0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, size, size);
+    return sprite;
+  }
+
+  /**
+   * The holographic globe behind the idle cursors: a turning geodesic wireframe of glowing struts and
+   * nodes, the far side dimmer, each cursor's node ringed in its colour. Shown in the intro and finale,
+   * and while at least two cursors are idle; otherwise it fades out where it is.
+   */
+  function drawGlobe() {
+    const orbiting = globeShow || (running && !finishing && agents.filter((agent) => agent.idle).length >= 2);
+    root.classList.toggle('sw-globe-on', orbiting);
+    if (!orbiting) {
+      return;
+    }
+    const { canvas, ctx, sprite } = globe;
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const w = Math.round(innerWidth * dpr);
+    const h = Math.round(innerHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    const cx = innerWidth / 2;
+    const cy = innerHeight / 2;
+    const r = globeRadius();
+    const spin = sphereSpin(clock);
+    const pts = SPHERE.vertices.map((v) => projectSphere(v, spin, r));
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    // Struts in four depth bands, far to near, so each band is one path: wide and faint for the glow,
+    // then thin and bright for the line itself.
+    const bands = [[], [], [], []];
+    for (const [a, b] of SPHERE.edges) {
+      const z = (pts[a].z + pts[b].z) / 2;
+      bands[Math.min(3, Math.floor(((z + 1) / 2) * 4))].push(a, b);
+    }
+    bands.forEach((band, i) => {
+      const near = (i + 0.5) / 4;
+      ctx.beginPath();
+      for (let k = 0; k < band.length; k += 2) {
+        const p = pts[band[k]];
+        const q = pts[band[k + 1]];
+        ctx.moveTo(cx + p.x, cy + p.y);
+        ctx.lineTo(cx + q.x, cy + q.y);
+      }
+      ctx.strokeStyle = `rgba(30, 170, 255, ${(0.05 + near * 0.12).toFixed(3)})`;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.strokeStyle = `rgba(120, 220, 255, ${(0.12 + near * 0.55).toFixed(3)})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+    for (const p of pts) {
+      const near = (p.z + 1) / 2;
+      const s = 12 + near * 12;
+      ctx.globalAlpha = 0.25 + near * 0.75;
+      ctx.drawImage(sprite, cx + p.x - s / 2, cy + p.y - s / 2, s, s);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    // A ring in each seated cursor's colour around its node: the crew's places on the globe.
+    ctx.lineWidth = 2;
+    for (const agent of agents) {
+      if (agent.idle && r > 4) {
+        const p = pts[sphereNode(agent.index)];
+        ctx.globalAlpha = 0.35 + ((p.z + 1) / 2) * 0.65;
+        ctx.strokeStyle = agent.color;
+        ctx.beginPath();
+        ctx.arc(cx + p.x, cy + p.y, 7 + ((p.z + 1) / 2) * 3, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+    // The finale's burst: a bright ring thrown out from where the globe imploded.
+    if (burst > 0) {
+      const base = Math.min(innerWidth, innerHeight) * 0.16;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 1 - burst;
+      ctx.strokeStyle = 'rgb(140, 230, 255)';
+      ctx.lineWidth = 6 * (1 - burst) + 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, base * 2.2 * easeOut(burst), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.drawImage(sprite, cx - 60 * (1 - burst), cy - 60 * (1 - burst), 120 * (1 - burst), 120 * (1 - burst));
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
   }
 
   function complete(task) {
@@ -629,6 +790,7 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
     for (const agent of agents) {
       agent.draw();
     }
+    drawGlobe();
     rulers.draw(guideX);
   }
 
@@ -644,6 +806,7 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
     root.innerHTML = `<div class="sw-ruler sw-ruler-top"><i class="sw-band"></i></div>
 <div class="sw-ruler sw-ruler-left"><i class="sw-band"></i></div><div class="sw-corner"></div>
 <div class="sw-guide"><b class="sw-badge"></b></div>
+<canvas class="sw-globe"></canvas>
 <img class="sw-emblem" alt="" src="${import.meta.env.BASE_URL}favicon.png">
 <div class="sw-marks"></div><div class="sw-agents"></div>`;
     announcer = document.createElement('p');
@@ -652,6 +815,8 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
     document.body.append(root, announcer);
     marksLayer = root.querySelector('.sw-marks');
     agentsLayer = root.querySelector('.sw-agents');
+    const globeCanvas = root.querySelector('.sw-globe');
+    globe = { canvas: globeCanvas, ctx: globeCanvas.getContext('2d'), sprite: glowSprite() };
     rulers = createRulers(root);
     toolbar = createToolbar({
       onTour: () => (tour = !tour),
@@ -661,11 +826,6 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
       onReplay: replay,
     });
 
-    addEventListener('pointermove', (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-      mouse.seen = true;
-    }, { passive: true });
     // Taking the wheel (or a finger) stops the tour.
     const stopTour = () => {
       if (tour) {
@@ -739,20 +899,20 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
     guarded(intro(my));
   }
 
-  /** The cursors arrive and circle Spidey's mask in the middle of the screen, then fan out to work. */
+  /**
+   * The whole crew arrives at once and takes its places on the globe around Spidey's mask, then fans out
+   * to build what is on screen; whoever has nothing to do waits on the globe until you scroll.
+   */
   async function intro(my) {
-    const crew = Array.from({ length: 10 }, () => spawn(offscreen()));
-    const radius = Math.min(innerWidth, innerHeight) * 0.16;
-    await tween(INTRO_MS, (t) => {
-      const cx = scrollX + innerWidth / 2;
-      const cy = scrollY + innerHeight / 2;
-      crew.forEach((agent, i) => {
-        const a = (i / crew.length) * Math.PI * 2 + t * 2.6;
-        const r = radius * (1 + Math.sin(i * 1.7 + t * 6) * 0.12);
-        agent.x = lerp(agent.x, cx + Math.cos(a) * r, 0.12);
-        agent.y = lerp(agent.y, cy + Math.sin(a) * r, 0.12);
-      });
-    }, my);
+    const crew = Array.from({ length: MAX_AGENTS }, () => spawn(offscreen()));
+    globeShow = true;
+    crew.forEach((agent) => (agent.idle = true));
+    await tween(INTRO_MS, () => crew.forEach((agent) => seat(agent, 0.1)), my);
+    globeShow = false;
+    crew.forEach((agent) => {
+      agent.idle = false;
+      agent.pinned = false;
+    });
     root.classList.remove('sw-intro');
     introDone = true;
     lastProgress = clock;
@@ -773,28 +933,30 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
     onDone({ reason });
   }
 
-  /** Everything is built: the rulers go, the cursors flock to your mouse and leave, Spidey takes over. */
+  /**
+   * Everything is built: the rulers go, the whole crew gathers back into the globe, it implodes into a
+   * point and bursts, and Spidey takes over. (Durations are times speed: the clock runs speed× fast.)
+   */
   async function finale(my) {
     if (finishing) {
       return;
     }
     settle('built');
-    await tween(FLOCK_MS * speed, (t) => {
-      const cx = (mouse.seen ? mouse.x : innerWidth / 2) + scrollX;
-      const cy = (mouse.seen ? mouse.y : innerHeight / 2) + scrollY;
-      agents.forEach((agent, i) => {
-        agent.setShape('arrow');
-        const a = i * 2.4 + clock / 700;
-        const r = 34 + (i % 5) * 14;
-        const pull = 0.05 + (i % 3) * 0.02;
-        agent.x = lerp(agent.x, cx + Math.cos(a) * r, pull);
-        agent.y = lerp(agent.y, cy + Math.sin(a) * r, pull);
-      });
-      if (t > 0.8) {
-        root.classList.add('sw-gone');
-      }
+    globeShow = true;
+    agents.forEach((agent) => {
+      agent.setShape('arrow');
+      agent.follow = null;
+      agent.idle = true;
+    });
+    await tween(GATHER_MS * speed, () => agents.forEach((agent) => seat(agent, 0.1)), my);
+    await tween(IMPLODE_MS * speed, (t) => {
+      globeScale = 1 - t * t * t;
+      agents.forEach((agent) => seat(agent, 0.3));
     }, my);
-    await wait(400 * speed, my);
+    root.classList.add('sw-gone');
+    await tween(BURST_MS * speed, (t) => {
+      burst = Math.max(0.001, t);
+    }, my);
     teardown();
   }
 
@@ -822,6 +984,10 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
     agents.forEach((agent) => agent.el.remove());
     agents = [];
     toolbar.setAgents(agents);
+    root.classList.remove('sw-globe-on');
+    globeShow = false;
+    globeScale = 1;
+    burst = 0;
     guideX = null;
     rulers.guide(null);
     rulers.draw(null);

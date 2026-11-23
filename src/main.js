@@ -16,6 +16,7 @@ import { initTheme } from './theme.js';
 import { initGuide } from './sections/guide.js';
 import { createShowcase } from './sections/showcase.js';
 import { initTerminal } from './sections/terminal.js';
+import { initScrollspy } from './sections/scrollspy.js';
 import { createSwarm } from './swarm/engine.js';
 
 const settings = new SettingsStore();
@@ -190,6 +191,8 @@ if (document.documentElement.classList.contains('swarm-pending')) {
   }
   wakeSpidey();
 }
+
+initScrollspy();
 
 // For checks in the browser: what he is doing, like spidey-hang-site's window.__spideyState.
 window.__spideyState = () => ({

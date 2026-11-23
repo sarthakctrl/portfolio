@@ -125,3 +125,84 @@ export function gapLabel(master, copy) {
 export function travelMs(dist) {
   return Math.max(240, Math.min(900, 200 + dist * 0.5));
 }
+
+/**
+ * A wireframe sphere with exactly n nodes, one for each cursor the swarm can have, so an idle cursor
+ * always has a node of its own to take. The nodes are spread evenly (a Fibonacci spiral) and joined into
+ * triangles by their convex hull, which on a sphere gives the geodesic look: every node linked to its
+ * nearest neighbours, no strut crossing another.
+ */
+export function nodeSphere(n) {
+  const vertices = Array.from({ length: n }, (_, i) => {
+    const y = 1 - ((i + 0.5) / n) * 2;
+    const ring = Math.sqrt(1 - y * y);
+    const a = i * Math.PI * (3 - Math.sqrt(5));
+    return [Math.cos(a) * ring, y, Math.sin(a) * ring];
+  });
+  // Hull faces by brute force (n is small): a triangle is a face when every other node is on one side.
+  const edges = new Map();
+  const sub = (p, q) => [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
+  const dot = (p, q) => p[0] * q[0] + p[1] * q[1] + p[2] * q[2];
+  for (let a = 0; a < n; a++) {
+    for (let b = a + 1; b < n; b++) {
+      for (let c = b + 1; c < n; c++) {
+        const u = sub(vertices[b], vertices[a]);
+        const v = sub(vertices[c], vertices[a]);
+        const normal = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+        let above = 0;
+        let below = 0;
+        for (let k = 0; k < n && !(above && below); k++) {
+          const side = dot(normal, sub(vertices[k], vertices[a]));
+          if (side > 1e-9) {
+            above++;
+          } else if (side < -1e-9) {
+            below++;
+          }
+        }
+        if (!(above && below)) {
+          for (const [p, q] of [[a, b], [b, c], [a, c]]) {
+            edges.set(`${p},${q}`, [p, q]);
+          }
+        }
+      }
+    }
+  }
+  return { vertices, edges: [...edges.values()] };
+}
+
+/** The sphere the idle cursors make: one node per cursor the swarm can have, built once. */
+export const SPHERE = nodeSphere(MAX_AGENTS);
+/** One full turn of the globe, in swarm ms. */
+export const SPHERE_TURN_MS = 14_000;
+
+/** The globe's turn at swarm time `clock`: spinning about its axis, tipped toward the viewer a little. */
+export function sphereSpin(clock) {
+  return {
+    yaw: (clock / SPHERE_TURN_MS) * Math.PI * 2,
+    pitch: -0.38 + Math.sin(clock / 7000) * 0.12,
+  };
+}
+
+/**
+ * Where unit point v lands on screen for a globe of radius r turned by spin, around (0, 0). z runs from
+ * -1 (the far side) to 1 (facing you), so the far side can be drawn dimmer and smaller.
+ */
+export function projectSphere([x, y, z], spin, r) {
+  const cy = Math.cos(spin.yaw);
+  const sy = Math.sin(spin.yaw);
+  const x1 = x * cy - z * sy;
+  const z1 = x * sy + z * cy;
+  const cp = Math.cos(spin.pitch);
+  const sp = Math.sin(spin.pitch);
+  const y2 = y * cp - z1 * sp;
+  const z2 = y * sp + z1 * cp;
+  return { x: x1 * r, y: y2 * r, z: z2 };
+}
+
+/** The node idle cursor `index` takes: its own, as there is one node per cursor. */
+export const sphereNode = (index) => index % SPHERE.vertices.length;
+
+/** Where idle cursor `index` sits on the globe at swarm time `clock` (see projectSphere). */
+export function spherePoint(index, clock, r) {
+  return projectSphere(SPHERE.vertices[sphereNode(index)], sphereSpin(clock), r);
+}
