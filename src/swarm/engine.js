@@ -37,7 +37,8 @@ const IMPLODE_MS = 520;
 const BURST_MS = 520;
 /**
  * With work ready and nothing landing for this long, something is wrong: show the finished page.
- * Swarm time, which stands still while the tab is hidden, so coming back to the tab never trips it.
+ * Counted only while work is ready (idle time does not count), and in swarm time, which stands still
+ * while the tab is hidden, so neither a long pause nor coming back to the tab trips it.
  */
 const STALL_MS = 12_000;
 const ABORT = Symbol('swarm stopped');
@@ -763,7 +764,11 @@ export function createSwarm({ layers: sel, onDone = () => {}, onStart = () => {}
           scrollTo({ top: Math.min(bottom, scrollY + 2.4 * speed * (dt / 16)), behavior: 'instant' });
         }
       }
-      if (introDone && ready > 0 && clock - lastProgress > STALL_MS) {
+      // The stall clock only runs while work is waiting: time spent idle on the globe with nothing on
+      // screen left to build is not a stall, so scrolling on after a long pause never trips it.
+      if (ready === 0) {
+        lastProgress = clock;
+      } else if (introDone && clock - lastProgress > STALL_MS) {
         fail(new Error(`no layer built in ${STALL_MS / 1000} s with ${ready} ready`));
         return;
       }

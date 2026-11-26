@@ -1,6 +1,6 @@
 /*
- * The swarm's cursors: who they are (Tony Stark's AIs, with suits from the House Party Protocol that
- * JARVIS flies filling out the crew) and how they are drawn: glowing nodes of the sphere, all in its
+ * The swarm's cursors: who they are (Tony Stark's AIs and more of Marvel's, with one House Party
+ * Protocol suit that JARVIS flies) and how they are drawn: glowing nodes of the sphere, all in its
  * blue, or mouse pointers in their own colours, switching shape while they work.
  */
 
@@ -19,9 +19,11 @@ const PALETTE = [
   ['JARVIS', '#0a84ff'], ['FRIDAY', '#c8202a'], ['EDITH', '#e8b33a'], ['Karen', '#e8467c'],
   ['Ultron', '#3a3d47'], ['Vision', '#14ae5c'], ['Dum-E', '#ff8a00'], ['U', '#00b5ce'],
   ['Butterfingers', '#9747ff'], ['HOMER', '#1f4a9a'], ['Jocasta', '#b5179e'], ['Veronica', '#f24e1e'],
-  // House Party Protocol suits, flown by JARVIS.
-  ['Igor', '#7a5af8'], ['Gemini', '#0acf83'], ['Heartbreaker', '#ff5fa2'], ['Hammerhead', '#5c6bc0'],
-  ['Striker', '#d4a017'], ['Python', '#ef6c00'],
+  // Igor is a House Party Protocol suit flown by JARVIS; the rest are more of Marvel's AIs: AIDA
+  // (Agents of S.H.I.E.L.D.), Natalie (Ironheart's suit AI), Arsenal (the Starks' war robot), and
+  // Alkhema and Viv (Ultron's and Vision's synthetic families).
+  ['Igor', '#7a5af8'], ['AIDA', '#0acf83'], ['Natalie', '#ff5fa2'], ['Arsenal', '#5c6bc0'],
+  ['Alkhema', '#d4a017'], ['Viv', '#ef6c00'],
 ];
 
 /** The crew as drawn: in the node style all of them share the sphere's blue. */
